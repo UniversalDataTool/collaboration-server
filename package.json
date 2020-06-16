@@ -1,0 +1,18 @@
+{
+  "name": "collaboration-server",
+  "version": "0.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/UniversalDataTool/collaboration-server",
+  "license": "MIT",
+  "scripts": {
+    "start": "micro-dev ./app.js",
+    "start:prod": "micro-dev ./app.js"
+  },
+  "dependencies": {
+    "ava": "^3.9.0",
+    "better-sqlite3": "^7.1.0",
+    "micro": "^9.3.4",
+    "micro-dev": "^3.0.0",
+    "microrouter": "^3.1.3"
+  }
+}
