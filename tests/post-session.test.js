@@ -1,16 +1,16 @@
 const test = require("ava")
-const getDB = require("../db")
-const app = require("../api/session/index.js")
-const http = require("http")
+const getDB = require("../src/db")
+const app = require("../app")
 const micro = require("micro")
 const listen = require("test-listen")
 const postJSON = require("bent")("json", "POST")
 
-test("get session", async t => {
+test("Create session", async t => {
   const db = await getDB({ testDB: true })
   const service = micro(app)
   const url = await listen(service)
-  const response = await postJSON(url, {
+
+  const response = await postJSON(`${url}/api/session`, {
     udt: {
       interface: {
         type: "image_segmentation",
@@ -42,8 +42,11 @@ test("get session", async t => {
       ]
     }
   })
-  t.assert(response.sessionId)
-  t.assert(await db("latest_session_state").first())
-
-  db.destroy()
+  t.assert(response.short_id)
+  const sessionAdded = db.prepare(`SELECT  *
+                           FROM latest_session_state
+                           WHERE short_id = ?
+                           LIMIT 1`).get(response.short_id)
+  t.assert(sessionAdded)
+  db.prepare(`DELETE FROM session_state WHERE short_id = ?`).run(response.short_id)
 })
