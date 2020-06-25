@@ -7,7 +7,7 @@
   "scripts": {
     "start": "micro-dev ./app.js",
     "start:prod": "micro-dev ./app.js",
-    "test": "npx ava"
+    "ava": "npx ava"
   },
   "dependencies": {
     "ava": "^3.9.0",

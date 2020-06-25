@@ -8,7 +8,7 @@ module.exports = (options) => {
 
   if (db) return db
 
-  db = sqlite(options.databasePath || ":mem:", {
+  db = sqlite(options.databasePath || "collaboration-server.db", {
     verbose: options.verbose !== undefined ? options.verbose : null,
   })
 
