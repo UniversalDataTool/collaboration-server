@@ -1,15 +1,13 @@
-FROM node:latest
+FROM node:12
 
 WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY package.json /usr/src/app/
-RUN npm install -g micro
-RUN npm install
-
-# Copy app source code
 COPY . /usr/src/app
 
+RUN yarn install
+
 #Expose port and start application
-CMD [ "npm", "start" ]
+CMD [ "yarn", "start:prod" ]
 EXPOSE 3000
