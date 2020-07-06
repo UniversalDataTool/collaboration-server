@@ -77,10 +77,10 @@ const patchSamples = (async (sessionId, samplePatches) => {
         }
 
         console.log('sessionSampleId', sessionSampleId)
-        // samplesToAdd.forEach((sample) => {
-        //     sessionSampleId += 1
-        //     samplesQueries.push(db.prepare('INSERT INTO sample_state (session_state_id, session_sample_id, content) VALUES (?, ?, ?)').run(sessionId, sessionSampleId, JSON.stringify(sample)));
-        // })
+        samplesToAdd.forEach((sample) => {
+            sessionSampleId += 1
+            samplesQueries.push(db.prepare('INSERT INTO sample_state (session_state_id, session_sample_id, content) VALUES (?, ?, ?)').run(sessionId, sessionSampleId, JSON.stringify(sample)));
+        })
     }
 
     if (Object.keys(samplesToUpdateAnnotation).length) {
@@ -108,8 +108,5 @@ const patchSamples = (async (sessionId, samplePatches) => {
         })
     }
 
-
-
     await Promise.all(samplesQueries)
-
 })
