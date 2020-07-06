@@ -1,21 +1,33 @@
-const { send } = require("micro")
+const {send} = require("micro")
 const cors = require("micro-cors")()
 const error = require("../../utils/error")
 const getDB = require('../db')
 const db = getDB({databasePath: 'udt.db', verbose: null})
 
 module.exports = cors(async (req, res) => {
-  const sessionId = req.params.session_id
+    const sessionId = req.params.session_id
 
-  const stmt = db.prepare(`SELECT  *
+    const session = db.prepare(`SELECT  *
                            FROM latest_session_state
                            WHERE short_id = ?
-                           LIMIT 1`);
-  const result = stmt.get(sessionId);
+                           LIMIT 1`).get(sessionId);
 
-  if (!result) return error(res, 404, `Session "${sessionId}" Not Found`)
+    if (!session) return error(res, 404, `Session "${sessionId}" Not Found`)
 
-  result.udt_json = JSON.parse(result.udt_json)
-  result.patch = JSON.parse(result.patch)
-  return send(res, 200, result)
+    const samplesQueryResults = db.prepare(`SELECT  *
+                           FROM latest_sample_state
+                           WHERE session_state_id = ?`).all(session.session_state_id);
+
+    const samples = []
+    samplesQueryResults.forEach(sample => {
+        const content = JSON.parse(sample.content)
+        const annotation = JSON.parse(sample.annotation)
+        samples.push(Object.assign({}, content, annotation))
+    })
+    session.udt_json = JSON.parse(session.udt_json)
+    session.patch = JSON.parse(session.patch)
+    session.udt_json.samples = samples
+
+    return send(res, 200, session)
 })
+
