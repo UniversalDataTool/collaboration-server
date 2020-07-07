@@ -21,11 +21,10 @@ module.exports = cors(async (req, res) => {
     const samplePatches = body.patch.filter(patch => patch.path.includes('/samples'))
     const udtPatches = body.patch.filter(patch => !patch.path.includes('/samples'))
 
-    // console.log(session.udt_json)
     let newJSON = {...JSON.parse(session.udt_json)}
     fjp.applyPatch(newJSON, udtPatches)
 
-    await patchSamples(session.session_state_id, samplePatches)
+    await patchSamples(session.short_id, samplePatches)
     const latestVersion = session.version + 1
 
     const insertStmt = db.prepare(`
@@ -45,68 +44,77 @@ module.exports = cors(async (req, res) => {
     return send(res, 200, {latestVersion, hashOfLatestState: hash(newJSON)})
 })
 
+const patchSamplesAnnotation = (async (sessionId, samplePatches) => {
+
+    const sampleIds = {}
+    samplePatches.forEach(patch => {
+        const pathArray = patch.path.split('/')
+        const sessionSampleId = pathArray[2]
+        sampleIds[sessionSampleId] = {sessionSampleId}
+    })
+
+    const samplesArray = []
+    const samples = db.prepare('SELECT * FROM latest_sample_state WHERE session_short_id = ? ORDER BY session_sample_id ASC').all(sessionId);
+    samples.forEach(sample => {
+        const content = JSON.parse(sample.content)
+        const annotation = JSON.parse(sample.annotation)
+        samplesArray.push({
+            ...content,
+            annotation: annotation,
+            version: parseInt(sample.version),
+            session_sample_id: sample.session_sample_id
+        })
+    })
+    let newJSON = {samples: samplesArray}
+    fjp.applyPatch(newJSON, samplePatches)
+
+    const queries = []
+    Object.keys(sampleIds).forEach(sampleId => {
+        const sample = samplesArray[sampleId]
+        const session_sample_id = sample.session_sample_id
+        const version = sample.version + 1
+        const annotation = sample.annotation
+
+        delete sample.session_sample_id
+        delete sample.version
+        delete sample.annotation
+
+        queries.push(
+            db.prepare('INSERT INTO sample_state (session_short_id, session_sample_id, version, annotation, content) VALUES (?, ?, ?, ?, ?)')
+                .run(sessionId, session_sample_id, version, JSON.stringify(annotation), JSON.stringify(sample)));
+    })
+
+    return queries
+})
+
 const patchSamples = (async (sessionId, samplePatches) => {
 
     const samplesToAdd = []
-    const samplesToUpdateAnnotation = {}
-
+    const samplesAnnotationPatches = []
     samplePatches.forEach(patch => {
-        if (patch.op === 'add') {
-            if (patch.path === '/samples/-') {
-                samplesToAdd.push(patch.value)
-            } else if (/samples\/[0-9]*\/annotation/.test(patch.path)) {
-                const pathArray = patch.path.split('/')
-                samplesToUpdateAnnotation[pathArray[2]] = {
-                    session_sample_id: pathArray[2],
-                    value: patch.value
-                }
-            }
+        if (patch.op === 'add' && patch.path === '/samples/-') {
+            samplesToAdd.push(patch.value)
+        }
+
+        if (/samples\/[0-9]*\/annotation/.test(patch.path)) {
+            samplesAnnotationPatches.push(patch)
         }
     })
-
-    console.log('samplesToAdd', samplesToAdd)
-    console.log('samplesToUpdate', samplesToUpdateAnnotation)
 
     const samplesQueries = []
     if (samplesToAdd.length) {
         let sessionSampleId = -1
-        const latestSample = db.prepare('SELECT * FROM sample_state WHERE session_state_id = ? ORDER BY session_sample_id DESC LIMIT 1').get(sessionId);
-        console.log('latestSample', sessionId)
+        const latestSample = db.prepare('SELECT * FROM sample_state WHERE session_short_id = ? ORDER BY session_sample_id DESC LIMIT 1').get(sessionId);
         if (latestSample) {
             sessionSampleId = parseInt(latestSample.session_sample_id)
         }
 
-        console.log('sessionSampleId', sessionSampleId)
         samplesToAdd.forEach((sample) => {
             sessionSampleId += 1
-            samplesQueries.push(db.prepare('INSERT INTO sample_state (session_state_id, session_sample_id, content) VALUES (?, ?, ?)').run(sessionId, sessionSampleId, JSON.stringify(sample)));
+            samplesQueries.push(db.prepare('INSERT INTO sample_state (session_short_id, session_sample_id, content) VALUES (?, ?, ?)').run(sessionId, sessionSampleId, JSON.stringify(sample)));
         })
     }
 
-    if (Object.keys(samplesToUpdateAnnotation).length) {
-        const updatedSamples = []
-        const samples = db.prepare('SELECT * FROM latest_sample_state WHERE session_state_id = ? AND session_sample_id IN (?)').all(sessionId, Object.keys(samplesToUpdateAnnotation));
-        console.log('samples', samples)
-        samples.forEach(sample => {
-            let annotation = JSON.parse(sample.annotation)
-            if (Array.isArray(annotation)) {
-                annotation.push(samplesToUpdateAnnotation[sample.session_sample_id].value)
-            } else {
-                annotation = [samplesToUpdateAnnotation[sample.session_sample_id].value]
-            }
-            updatedSamples.push({
-                ...sample,
-                version: sample.version + 1,
-                annotation: JSON.stringify(annotation)
-            })
-        })
-
-        updatedSamples.forEach((sample) => {
-            samplesQueries.push(
-                db.prepare('INSERT INTO sample_state (session_state_id, session_sample_id, version, annotation, content) VALUES (?, ?, ?, ?, ?)')
-                    .run(sessionId, sample.session_sample_id, sample.version, sample.annotation, sample.content));
-        })
-    }
-
-    await Promise.all(samplesQueries)
+    const patchSamplesAnnotationQueries =  await patchSamplesAnnotation(sessionId, samplesAnnotationPatches)
+    await Promise.all([...samplesQueries, ...patchSamplesAnnotationQueries])
 })

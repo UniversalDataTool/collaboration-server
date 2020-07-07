@@ -27,7 +27,7 @@ module.exports = (db) => {
                 
         CREATE TABLE IF NOT EXISTS sample_state (
             sample_state_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            session_state_id INTEGER REFERENCES session_state(session_state_id) ON UPDATE CASCADE,   
+            session_short_id TEXT NOT NULL,   
             session_sample_id INTEGER NOT NULL,     
             version INTEGER NOT NULL DEFAULT 0,
             content TEXT NOT NULL,
@@ -46,7 +46,7 @@ module.exports = (db) => {
                         order by sample_state_id DESC
                   ) as sample_state
             GROUP BY 
-                session_state_id, session_sample_id;
+                session_short_id, session_sample_id;
                 
         CREATE INDEX IF NOT EXISTS short_id_idx ON session_state(short_id);
         CREATE INDEX IF NOT EXISTS previous_session_state_id_idx ON session_state(previous_session_state_id);`;

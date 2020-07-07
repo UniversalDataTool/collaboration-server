@@ -16,15 +16,16 @@ module.exports = cors(async (req, res) => {
   const udt = JSON.stringify(body.udt)
   const shortId = randomstring.generate({ length: 6, readable: true })
 
-  const sessionState = await db.prepare('INSERT INTO session_state (short_id, udt_json) VALUES (?, ?)').run(shortId, udt);
-  const sessionStateId = sessionState.lastInsertRowid
+  await db.prepare('INSERT INTO session_state (short_id, udt_json) VALUES (?, ?)').run(shortId, udt);
 
-  const samplesQueries = []
-  samples.forEach((sample, index) => {
-    samplesQueries.push(db.prepare('INSERT INTO sample_state (session_state_id, session_sample_id, content) VALUES (?, ?, ?)').run(sessionStateId, index, JSON.stringify(sample)));
-  })
+  if (Array.isArray(samples)) {
+    const samplesQueries = []
+    samples.forEach((sample, index) => {
+      samplesQueries.push(db.prepare('INSERT INTO sample_state (session_short_id, session_sample_id, content) VALUES (?, ?, ?)').run(shortId, index, JSON.stringify(sample)));
+    })
 
-  await Promise.all(samplesQueries)
+    await Promise.all(samplesQueries)
+  }
 
   return send(res, 200, { short_id: shortId, version: 0 })
 })

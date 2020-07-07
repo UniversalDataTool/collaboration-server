@@ -16,13 +16,13 @@ module.exports = cors(async (req, res) => {
 
     const samplesQueryResults = db.prepare(`SELECT  *
                            FROM latest_sample_state
-                           WHERE session_state_id = ?`).all(session.session_state_id);
+                           WHERE session_short_id = ?`).all(session.short_id);
 
     const samples = []
     samplesQueryResults.forEach(sample => {
         const content = JSON.parse(sample.content)
         const annotation = JSON.parse(sample.annotation)
-        samples.push(Object.assign({}, content, annotation))
+        samples.push(Object.assign({}, content, {annotation}))
     })
     session.udt_json = JSON.parse(session.udt_json)
     session.patch = JSON.parse(session.patch)
