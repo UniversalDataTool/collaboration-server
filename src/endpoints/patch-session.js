@@ -44,6 +44,23 @@ module.exports = cors(async (req, res) => {
     return send(res, 200, {latestVersion, hashOfLatestState: hash(newJSON)})
 })
 
+const patchCreateSamples = (async (sessionId, samplesToAdd) => {
+    const samplesQueries = []
+    if (samplesToAdd.length) {
+        let sessionSampleId = -1
+        const latestSample = db.prepare('SELECT * FROM sample_state WHERE session_short_id = ? ORDER BY session_sample_id DESC LIMIT 1').get(sessionId);
+        if (latestSample) {
+            sessionSampleId = parseInt(latestSample.session_sample_id)
+        }
+
+        samplesToAdd.forEach((sample) => {
+            sessionSampleId += 1
+            samplesQueries.push(db.prepare('INSERT INTO sample_state (session_short_id, session_sample_id, content) VALUES (?, ?, ?)').run(sessionId, sessionSampleId, JSON.stringify(sample)));
+        })
+    }
+    return samplesQueries
+})
+
 const patchSamplesAnnotation = (async (sessionId, samplePatches) => {
 
     const sampleIds = {}
@@ -101,20 +118,7 @@ const patchSamples = (async (sessionId, samplePatches) => {
         }
     })
 
-    const samplesQueries = []
-    if (samplesToAdd.length) {
-        let sessionSampleId = -1
-        const latestSample = db.prepare('SELECT * FROM sample_state WHERE session_short_id = ? ORDER BY session_sample_id DESC LIMIT 1').get(sessionId);
-        if (latestSample) {
-            sessionSampleId = parseInt(latestSample.session_sample_id)
-        }
-
-        samplesToAdd.forEach((sample) => {
-            sessionSampleId += 1
-            samplesQueries.push(db.prepare('INSERT INTO sample_state (session_short_id, session_sample_id, content) VALUES (?, ?, ?)').run(sessionId, sessionSampleId, JSON.stringify(sample)));
-        })
-    }
-
+    const patchCreateSamplesQuery = await patchCreateSamples(sessionId, samplesToAdd)
     const patchSamplesAnnotationQueries =  await patchSamplesAnnotation(sessionId, samplesAnnotationPatches)
-    await Promise.all([...samplesQueries, ...patchSamplesAnnotationQueries])
+    await Promise.all([...patchCreateSamplesQuery, ...patchSamplesAnnotationQueries])
 })
