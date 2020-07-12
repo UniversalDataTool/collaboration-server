@@ -5,6 +5,7 @@ const hash = require("../../utils/hash.js")
 const error = require("../../utils/error")
 const getDB = require('../db')
 const db = getDB({databasePath: 'udt.db', verbose: null})
+const asyncForEach = require('../../utils/asyncForEach')
 
 module.exports = cors(async (req, res) => {
     if (req.method === "OPTIONS") return send(res, 200, "ok")
@@ -61,6 +62,40 @@ const patchCreateSamples = (async (sessionId, samplesToAdd) => {
     return samplesQueries
 })
 
+const patchRemoveSamples = (async (sessionId, patches) => {
+    if (patches.length) {
+        await asyncForEach(patches, async (patch) => {
+            const pathArray = patch.path.split('/')
+            const indexToRemove = pathArray[2]
+
+            await db.prepare('DELETE FROM sample_state WHERE session_short_id = ? AND session_sample_id = ? ').run(sessionId, indexToRemove);
+            await db.prepare(`
+                INSERT INTO sample_state 
+                    (session_short_id, session_sample_id, version, content, summary, annotation) 
+                SELECT 
+                    session_short_id, session_sample_id - 1, version + 1, content, summary, annotation
+                FROM 
+                    latest_sample_state
+                WHERE 
+                    session_short_id = ? AND session_sample_id > ?`).run(sessionId, indexToRemove);
+
+            await db.prepare(`
+                DELETE FROM sample_state 
+                WHERE sample_state_id IN (
+                    SELECT sample_state_id
+                    FROM sample_state
+                    WHERE session_sample_id = (
+                        SELECT session_sample_id
+                        FROM latest_sample_state 
+                        WHERE session_short_id = ? 
+                        ORDER BY session_sample_id DESC 
+                        limit 1
+                    )
+                )`).run(sessionId);
+        })
+    }
+})
+
 const patchSamplesAnnotation = (async (sessionId, samplePatches) => {
 
     const sampleIds = {}
@@ -107,10 +142,14 @@ const patchSamplesAnnotation = (async (sessionId, samplePatches) => {
 const patchSamples = (async (sessionId, samplePatches) => {
 
     const samplesToAdd = []
+    const samplesToRemove = []
     const samplesAnnotationPatches = []
     samplePatches.forEach(patch => {
         if (patch.op === 'add' && patch.path === '/samples/-') {
             samplesToAdd.push(patch.value)
+        }
+        if (patch.op === 'remove' && /samples\/[0-9]/.test(patch.path)) {
+            samplesToRemove.push(patch)
         }
 
         if (/samples\/[0-9]*\/annotation/.test(patch.path)) {
@@ -121,4 +160,5 @@ const patchSamples = (async (sessionId, samplePatches) => {
     const patchCreateSamplesQuery = await patchCreateSamples(sessionId, samplesToAdd)
     const patchSamplesAnnotationQueries =  await patchSamplesAnnotation(sessionId, samplesAnnotationPatches)
     await Promise.all([...patchCreateSamplesQuery, ...patchSamplesAnnotationQueries])
+    await patchRemoveSamples(sessionId, samplesToRemove)
 })
