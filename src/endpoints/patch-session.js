@@ -42,6 +42,19 @@ module.exports = cors(async (req, res) => {
         JSON.stringify(newJSON)
     );
 
+    const samplesQueryResults = db.prepare(`SELECT  *
+                           FROM latest_sample_state
+                           WHERE session_short_id = ?`).all(session.short_id);
+
+    const samples = []
+    samplesQueryResults.forEach(sample => {
+        const content = JSON.parse(sample.content)
+        const annotation = JSON.parse(sample.annotation)
+        samples.push(Object.assign({}, content, {annotation}))
+    })
+
+    newJSON.samples = samples
+
     return send(res, 200, {latestVersion, hashOfLatestState: hash(newJSON)})
 })
 
@@ -147,13 +160,10 @@ const patchSamples = (async (sessionId, samplePatches) => {
     samplePatches.forEach(patch => {
         if (patch.op === 'add' && patch.path === '/samples/-') {
             samplesToAdd.push(patch.value)
-        }
-        if (patch.op === 'remove' && /samples\/[0-9]/.test(patch.path)) {
-            samplesToRemove.push(patch)
-        }
-
-        if (/samples\/[0-9]*\/annotation/.test(patch.path)) {
+        } else if (/samples\/[0-9]\/\w/.test(patch.path)) {
             samplesAnnotationPatches.push(patch)
+        } else if (patch.op === 'remove' && /samples\/[0-9]$/.test(patch.path)) {
+            samplesToRemove.push(patch)
         }
     })
 
