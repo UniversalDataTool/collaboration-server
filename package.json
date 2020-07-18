@@ -7,7 +7,9 @@
   "scripts": {
     "start": "micro-dev ./app.js",
     "start:prod": "micro-dev ./app.js",
-    "ava": "npx ava"
+    "ava": "npx ava",
+    "prettier": "prettier --write \"src/**/*.js\"",
+    "test:prettier": "prettier --check \"src/**/*.js\""
   },
   "dependencies": {
     "ava": "^3.9.0",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "bent": "^7.3.6",
+    "prettier": "^2.0.5",
     "test-listen": "^1.1.0"
   }
 }
