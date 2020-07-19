@@ -1,12 +1,12 @@
-const { send } = require("micro");
-const cors = require("micro-cors")();
-const error = require("../../utils/error");
-const getSessionUDT = require("../../utils/getSessionUDT");
-const getDB = require("../db");
-const db = getDB({ databasePath: "udt.db", verbose: null });
+const { send } = require("micro")
+const cors = require("micro-cors")()
+const error = require("../../utils/error")
+const getSessionUDT = require("../../utils/getSessionUDT")
+const getDB = require("../db")
+const db = getDB({ databasePath: "udt.db", verbose: null })
 
 module.exports = cors(async (req, res) => {
-  const sessionId = req.params.session_id;
+  const sessionId = req.params.session_id
 
   const session = db
     .prepare(
@@ -15,9 +15,9 @@ module.exports = cors(async (req, res) => {
                            WHERE short_id = ?
                            LIMIT 1`
     )
-    .get(sessionId);
+    .get(sessionId)
 
-  if (!session) return error(res, 404, `Session "${sessionId}" Not Found`);
+  if (!session) return error(res, 404, `Session "${sessionId}" Not Found`)
 
   const samplesQueryResults = db
     .prepare(
@@ -25,16 +25,16 @@ module.exports = cors(async (req, res) => {
                            FROM sample_state
                            WHERE session_short_id = ?`
     )
-    .all(session.short_id);
+    .all(session.short_id)
 
-  const samples = [];
+  const samples = []
   samplesQueryResults.forEach((sample) => {
-    const sessionUDT = getSessionUDT(sample);
-    samples.push(sessionUDT);
-  });
-  session.udt_json = JSON.parse(session.udt_json);
-  session.patch = JSON.parse(session.patch);
-  session.udt_json.samples = samples;
+    const sessionUDT = getSessionUDT(sample)
+    samples.push(sessionUDT)
+  })
+  session.udt_json = JSON.parse(session.udt_json)
+  session.patch = JSON.parse(session.patch)
+  session.udt_json.samples = samples
 
-  return send(res, 200, session);
-});
+  return send(res, 200, session)
+})

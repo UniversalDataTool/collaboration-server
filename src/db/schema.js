@@ -37,6 +37,6 @@ module.exports = (db) => {
         );
                 
         CREATE INDEX IF NOT EXISTS short_id_idx ON session_state(short_id);
-        CREATE INDEX IF NOT EXISTS previous_session_state_id_idx ON session_state(previous_session_state_id);`;
-  db.exec(sqlInit);
-};
+        CREATE INDEX IF NOT EXISTS previous_session_state_id_idx ON session_state(previous_session_state_id);`
+  db.exec(sqlInit)
+}
