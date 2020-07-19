@@ -1,7 +1,7 @@
 const { send } = require("micro")
 const cors = require("micro-cors")()
 const error = require("../../utils/error")
-const getSessionUDT = require("../../utils/getSessionUDT")
+const getSampleObject = require("../../utils/getSampleObject")
 const getDB = require("../db")
 const db = getDB({ databasePath: "udt.db", verbose: null })
 
@@ -29,7 +29,7 @@ module.exports = cors(async (req, res) => {
 
   const samples = []
   samplesQueryResults.forEach((sample) => {
-    const sessionUDT = getSessionUDT(sample)
+    const sessionUDT = getSampleObject(sample)
     samples.push(sessionUDT)
   })
   session.udt_json = JSON.parse(session.udt_json)

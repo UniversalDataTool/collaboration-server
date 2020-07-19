@@ -3,7 +3,7 @@ const cors = require("micro-cors")()
 const fjp = require("fast-json-patch")
 const hash = require("../../utils/hash.js")
 const error = require("../../utils/error")
-const getSessionUDT = require("../../utils/getSessionUDT")
+const getSampleObject = require("../../utils/getSampleObject")
 const getDB = require("../db")
 const db = getDB({ databasePath: "udt.db", verbose: null })
 
@@ -58,7 +58,7 @@ module.exports = cors(async (req, res) => {
 
   const samples = []
   samplesQueryResults.forEach((sample) => {
-    const sessionUDT = getSessionUDT(sample)
+    const sessionUDT = getSampleObject(sample)
     samples.push(sessionUDT)
   })
 
@@ -131,7 +131,7 @@ const patchSamplesAnnotation = async (sessionId, samplePatches) => {
     )
     .all(sessionId)
   samples.forEach((sample) => {
-    const sessionUDT = getSessionUDT(sample)
+    const sessionUDT = getSampleObject(sample)
     samplesArray.push({
       ...sessionUDT,
       summary_version: parseInt(sample.summary_version),

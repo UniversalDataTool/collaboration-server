@@ -1,7 +1,7 @@
-const getSessionUDT = (sample) => {
+const getSampleObject = (sample) => {
   const content = JSON.parse(sample.content);
   const annotation = JSON.parse(sample.annotation);
   return { ...content, annotation };
 };
 
-module.exports = getSessionUDT;
+module.exports = getSampleObject;
