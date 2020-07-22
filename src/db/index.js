@@ -5,7 +5,6 @@ const loadSeed = require("./seed.js")
 let db
 
 module.exports = (options) => {
-
   if (db) return db
 
   db = sqlite(options.databasePath || "collaboration-server.db", {
