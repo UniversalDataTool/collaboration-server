@@ -1,0 +1,44 @@
+participant Client 1
+
+
+participant Server
+
+
+participant Client 2
+
+entryspacing 0.7
+Client 1->Server:initializes the session { interface, samples }
+
+note right of Server: 1- insert session into session_state table that contains summarySamples \n { \n    "interface": { /* ... */ }, \n    "summary": { \n        "samples": [\n            { hasAnnotation: false, version: 1 },\n            { hasAnnotation: false, version: 1 }, \n            { hasAnnotation: false, version: 1 }, \n        ]\n     } \n  }\n \n2- insert samples into samples_state table
+
+Server -> Client 1:{ session_id, summary }
+
+Client 2 -> Server: GET /<session_id> { session_id }
+Server -> Client 2:{ interface, summary }
+
+Client 1 -> Server:PATCH /<session_id> { patch: { op: "replace", path: "/interface", value: {...} } }
+
+note right of Server: 1- apply patch on summarySamples interface \n2- insert new session with version + 1
+
+Server -> Client 1:{ version, hash: Hash(SummaryObject) }
+
+Client 2 -> Server: GET /<session_id>/diffs { session_id, current_version }
+Server -> Client 2:{ patches, hash, version }
+
+
+box right of Client 2: Opens Sample 1
+
+Client 2 -> Server: GET /<session_id>/sample/1
+Server -> Client 2: { sample }
+
+space
+Client 2 -> Server:PATCH /<session_id>/sample/1 { path: "/annotation", op: "replace" }
+
+note left of Server: 1- apply patch on samples and update sample with sample_version + 1 in samples_state table \n 2- update summarySamples from session_state then insert new session with version + 1
+
+Server -> Client 2:{ version, hash: Hash(SummaryObject) }
+
+Client 1 -> Server: GET /<session_id>/diffs
+Server -> Client 1:{ hash: Hash(SummaryObject), patches: [{...}] }
+
+box right of Client 1:Client 1 & Client 2 have\nthe same summary objects
