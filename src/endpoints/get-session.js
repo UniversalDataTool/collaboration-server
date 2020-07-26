@@ -11,9 +11,9 @@ module.exports = cors(async (req, res) => {
   const session = db
     .prepare(
       `SELECT  *
-                           FROM latest_session_state
-                           WHERE short_id = ?
-                           LIMIT 1`
+       FROM latest_session_state
+       WHERE short_id = ?
+       LIMIT 1`
     )
     .get(sessionId)
 
@@ -22,8 +22,8 @@ module.exports = cors(async (req, res) => {
   const samplesQueryResults = db
     .prepare(
       `SELECT  *
-                           FROM sample_state
-                           WHERE session_short_id = ?`
+       FROM sample_state
+       WHERE session_short_id = ?`
     )
     .all(session.short_id)
 

@@ -32,11 +32,11 @@ module.exports = cors(async (req, res) => {
   fjp.applyPatch(newJSON, udtPatches)
 
   await patchSamples(session.short_id, samplePatches)
-  const latestVersion = session.version + 1
+  const latestVersion = session.summary_version + 1
 
   const insertStmt = db.prepare(`
         INSERT INTO session_state
-        (previous_session_state_id, short_id, user_name, patch, version, udt_json)
+        (previous_session_state_id, short_id, user_name, patch, summary_version, udt_json)
         VALUES (?, ?, ?, ?, ?, ?)`)
 
   insertStmt.run(
@@ -109,7 +109,7 @@ const patchRemoveSamples = async (sessionId, patches) => {
       await db
         .prepare(
           `UPDATE sample_state
-                        SET summary_version = summary_version + 1, session_sample_index = session_sample_index - 1
+                        SET sample_version = sample_version + 1, session_sample_index = session_sample_index - 1
                         WHERE session_short_id = ? AND session_sample_index > ?;`
         )
         .run(sessionId, indexToRemove)
@@ -134,7 +134,7 @@ const patchSamplesAnnotation = async (sessionId, samplePatches) => {
     const sessionUDT = getSampleObject(sample)
     samplesArray.push({
       ...sessionUDT,
-      summary_version: parseInt(sample.summary_version),
+      sample_version: parseInt(sample.sample_version),
       session_sample_index: sample.session_sample_index,
     })
   })
@@ -145,22 +145,22 @@ const patchSamplesAnnotation = async (sessionId, samplePatches) => {
   Object.keys(sampleIndexes).forEach((sampleIndex) => {
     const sample = samplesArray[sampleIndex]
     const session_sample_index = sample.session_sample_index
-    const summary_version = sample.summary_version + 1
+    const sample_version = sample.sample_version + 1
     const annotation = sample.annotation
 
     delete sample.session_sample_index
-    delete sample.summary_version
+    delete sample.sample_version
     delete sample.annotation
 
     queries.push(
       db
         .prepare(
           `UPDATE sample_state
-          SET summary_version = ?, annotation = ?, content = ?
+          SET sample_version = ?, annotation = ?, content = ?
           WHERE session_short_id = ? AND session_sample_index = ?;`
         )
         .run(
-          summary_version,
+          sample_version,
           JSON.stringify(annotation),
           JSON.stringify(sample),
           sessionId,

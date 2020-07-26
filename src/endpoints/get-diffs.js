@@ -27,9 +27,9 @@ module.exports = cors(async (req, res) => {
 
   const samplesQueryResults = db
     .prepare(
-      ` SELECT  *
-                                           FROM sample_state
-                                           WHERE session_short_id = ?`
+      `SELECT  *
+       FROM sample_state
+       WHERE session_short_id = ?`
     )
     .all(session.short_id)
 
@@ -44,7 +44,7 @@ module.exports = cors(async (req, res) => {
   const patchesStmt = db.prepare(`
     SELECT patch, user_name 
     FROM session_state 
-    WHERE short_id = ? AND version > ? 
+    WHERE short_id = ? AND summary_version > ? 
     ORDER BY created_at ASC`)
   const patches = patchesStmt.all(sessionId, since)
 
@@ -68,7 +68,7 @@ module.exports = cors(async (req, res) => {
   return send(res, 200, {
     patch,
     changeLog,
-    latestVersion: session.version,
+    latestVersion: session.summary_version,
     hashOfLatestState: hash(session.udt_json),
   })
 })
