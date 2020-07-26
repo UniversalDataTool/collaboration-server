@@ -35,5 +35,5 @@ module.exports = cors(async (req, res) => {
     await Promise.all(samplesQueries)
   }
 
-  return send(res, 200, { short_id: shortId, version: 0 })
+  return send(res, 200, { short_id: shortId, summary_version: 0 })
 })
