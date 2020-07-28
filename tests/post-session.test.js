@@ -17,7 +17,7 @@ test("Create session", async (t) => {
         availableLabels: ["valid", "invalid"],
         regionTypesAllowed: ["bounding-box", "polygon", "point"],
       },
-      taskData: [
+      samples: [
         {
           imageUrl:
             "https://s3.amazonaws.com/asset.workaround.online/example-jobs/sticky-notes/image1.jpg",
@@ -26,32 +26,39 @@ test("Create session", async (t) => {
           imageUrl:
             "https://s3.amazonaws.com/asset.workaround.online/example-jobs/sticky-notes/image2.jpg",
         },
-      ],
-      taskOutput: [
-        [
-          {
-            regionType: "bounding-box",
-            centerX: 0.43416827231856137,
-            centerY: 0.3111753371868978,
-            width: 0.09248554913294799,
-            height: 0.0789980732177264,
-            color: "hsl(297,100%,50%)",
-          },
-        ],
-        null,
-      ],
+      ]
     },
   });
   t.assert(response.short_id);
   const sessionAdded = db
     .prepare(
       `SELECT  *
-                           FROM latest_session_state
-                           WHERE short_id = ?
-                           LIMIT 1`
+       FROM latest_session_state
+       WHERE short_id = ?
+       LIMIT 1`
     )
     .get(response.short_id);
   t.assert(sessionAdded);
+  t.deepEqual(JSON.parse(sessionAdded.summary_samples), {
+    "interface": {
+      type: "image_segmentation",
+      availableLabels: ["valid", "invalid"],
+      regionTypesAllowed: ["bounding-box", "polygon", "point"],
+    },
+    "summary": {
+      "samples": [
+        {
+          "hasAnnotation": false,
+          "version": 1
+        },
+        {
+          "hasAnnotation": false,
+          "version": 1
+        }
+      ]
+    }
+  })
+
   db.prepare(`DELETE FROM session_state WHERE short_id = ?`).run(
     response.short_id
   );
