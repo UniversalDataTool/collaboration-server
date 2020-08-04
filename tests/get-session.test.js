@@ -12,49 +12,50 @@ test("Get Session", async (t) => {
   const url = await listen(service);
 
   const objectToInsert = {
-    udt_json: {
-      interface: {
-        type: "image_segmentation",
-        availableLabels: ["valid", "invalid"],
-        regionTypesAllowed: ["bounding-box", "polygon", "point"],
-      },
-      taskData: [
-        {
-          imageUrl:
-            "https://s3.amazonaws.com/asset.workaround.online/example-jobs/sticky-notes/image1.jpg",
-        },
-        {
-          imageUrl:
-            "https://s3.amazonaws.com/asset.workaround.online/example-jobs/sticky-notes/image2.jpg",
-        },
-      ],
-      taskOutput: [
-        [
+    "summary_samples": {
+      "interface": {
+        "type": "image_classification",
+        "labels": [
           {
-            regionType: "bounding-box",
-            centerX: 0.43416827231856137,
-            centerY: 0.3111753371868978,
-            width: 0.09248554913294799,
-            height: 0.0789980732177264,
-            color: "hsl(297,100%,50%)",
+            "id": "valid",
+            "description": "valid"
           },
-        ],
-        null,
-      ],
+          {
+            "id": "invalid",
+            "description": "invalid"
+          }
+        ]
+      },
+      "summary": {
+        "samples": [
+          {
+            "hasAnnotation": false,
+            "version": 1
+          },
+          {
+            "hasAnnotation": false,
+            "version": 1
+          },
+          {
+            "hasAnnotation": false,
+            "version": 1
+          }
+        ]
+      }
     },
     short_id: "test",
   };
 
   db.prepare(
-    "INSERT INTO session_state (short_id, udt_json) VALUES (?, ?)"
-  ).run(objectToInsert.short_id, JSON.stringify(objectToInsert.udt_json));
+    "INSERT INTO session_state (short_id, summary_samples) VALUES (?, ?)"
+  ).run(objectToInsert.short_id, JSON.stringify(objectToInsert.summary_samples));
 
   const sessionAdded = db
     .prepare(
-      `SELECT  *
-                           FROM latest_session_state
-                           WHERE short_id = ?
-                           LIMIT 1`
+      `SELECT *
+       FROM latest_session_state
+       WHERE short_id = ?
+       LIMIT 1`
     )
     .get(objectToInsert.short_id);
   t.assert(sessionAdded);
