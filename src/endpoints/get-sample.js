@@ -14,9 +14,15 @@ module.exports = cors(async (req, res) => {
       `SELECT  *
        FROM sample_state
        WHERE session_short_id = ? AND session_sample_index = ?`
-    ).get(sessionId, sampleIndex)
+    )
+    .get(sessionId, sampleIndex)
 
-  if (!sample) return error(res, 404, `Sample "${sampleIndex}", Session "${sessionId}" Not Found`)
+  if (!sample)
+    return error(
+      res,
+      404,
+      `Sample "${sampleIndex}", Session "${sessionId}" Not Found`
+    )
 
   return send(res, 200, getSampleObject(sample))
 })
