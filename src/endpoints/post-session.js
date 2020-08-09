@@ -20,7 +20,10 @@ module.exports = cors(async (req, res) => {
     const samplesQueries = []
     samples.forEach((sample, index) => {
       samplesQueries.push(
-        db.prepare("INSERT INTO sample_state (session_short_id, session_sample_index, content) VALUES (?, ?, ?)")
+        db
+          .prepare(
+            "INSERT INTO sample_state (session_short_id, session_sample_index, content) VALUES (?, ?, ?)"
+          )
           .run(shortId, index, JSON.stringify(sample))
       )
 
@@ -33,13 +36,15 @@ module.exports = cors(async (req, res) => {
   const summary_samples = {
     interface: udt.interface,
     summary: {
-      samples: samplesSummary
-    }
+      samples: samplesSummary,
+    },
   }
 
   await db
-      .prepare("INSERT INTO session_state (short_id, summary_samples) VALUES (?, ?)")
-      .run(shortId, JSON.stringify(summary_samples))
+    .prepare(
+      "INSERT INTO session_state (short_id, summary_samples) VALUES (?, ?)"
+    )
+    .run(shortId, JSON.stringify(summary_samples))
 
   return send(res, 200, { short_id: shortId, summary_version: 0 })
 })
