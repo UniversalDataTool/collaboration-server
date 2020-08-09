@@ -6,7 +6,7 @@ const micro = require("micro");
 const listen = require("test-listen");
 const getJSON = require("bent")("json", "GET", 200, 400, 404);
 
-test("Get Session", async (t) => {
+test("Get Sample", async (t) => {
   const db = await getDB({ testDB: true });
   const service = micro(app);
   const url = await listen(service);
@@ -43,27 +43,41 @@ test("Get Session", async (t) => {
         ]
       }
     },
-    short_id: "test",
+    short_id: "testSample",
+    samples: [
+      {
+        imageUrl:
+            "https://s3.amazonaws.com/asset.workaround.online/example-jobs/sticky-notes/image1.jpg",
+      },
+      {
+        imageUrl:
+            "https://s3.amazonaws.com/asset.workaround.online/example-jobs/sticky-notes/image2.jpg",
+      },
+    ]
   };
 
   db.prepare(
-    "INSERT INTO session_state (short_id, summary_samples) VALUES (?, ?)"
+      "INSERT INTO session_state (short_id, summary_samples) VALUES (?, ?)"
   ).run(objectToInsert.short_id, JSON.stringify(objectToInsert.summary_samples));
 
-  const sessionAdded = db
-    .prepare(
-      `SELECT *
-       FROM latest_session_state
-       WHERE short_id = ?
-       LIMIT 1`
+  const samplesQueries = []
+  objectToInsert.samples.forEach((sample, index) => {
+    samplesQueries.push(
+        db.prepare("INSERT INTO sample_state (session_short_id, session_sample_index, content) VALUES (?, ?, ?)")
+            .run(objectToInsert.short_id, index, JSON.stringify(sample))
     )
-    .get(objectToInsert.short_id);
-  t.assert(sessionAdded);
+  })
+  await Promise.all(samplesQueries)
 
-  const response = await getJSON(`${url}/api/session/test`);
-  t.assert(response);
+  const response = await getJSON(`${url}/api/session/${objectToInsert.short_id}/sample/0`);
+
+  t.deepEqual(response, {
+    imageUrl:
+        "https://s3.amazonaws.com/asset.workaround.online/example-jobs/sticky-notes/image1.jpg",
+    annotation: null
+  })
 
   db.prepare(`DELETE FROM session_state WHERE short_id = ?`).run(
-    objectToInsert.short_id
+      objectToInsert.short_id
   );
 });

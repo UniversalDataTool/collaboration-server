@@ -25,21 +25,7 @@ module.exports = cors(async (req, res) => {
 
   if (!session) return error(res, 404, "Session Not Found")
 
-  const samplesQueryResults = db
-    .prepare(
-      `SELECT  *
-       FROM sample_state
-       WHERE session_short_id = ?`
-    )
-    .all(session.short_id)
-
-  const samples = []
-  samplesQueryResults.forEach((sample) => {
-    const sessionUDT = getSampleObject(sample)
-    samples.push(sessionUDT)
-  })
-  session.udt_json = JSON.parse(session.udt_json)
-  session.udt_json.samples = samples
+  session.summary_samples = JSON.parse(session.summary_samples)
 
   const patchesStmt = db.prepare(`
     SELECT patch, user_name 
@@ -69,6 +55,6 @@ module.exports = cors(async (req, res) => {
     patch,
     changeLog,
     latestVersion: session.summary_version,
-    hashOfLatestState: hash(session.udt_json),
+    hashOfLatestState: hash(session.summary_samples),
   })
 })

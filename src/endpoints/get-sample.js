@@ -7,20 +7,22 @@ const db = getDB({ databasePath: "udt.db", verbose: null })
 
 module.exports = cors(async (req, res) => {
   const sessionId = req.params.session_id
+  const sampleIndex = req.params.sample_index
 
-  const session = db
+  const sample = db
     .prepare(
       `SELECT  *
-       FROM latest_session_state
-       WHERE short_id = ?
-       LIMIT 1`
+       FROM sample_state
+       WHERE session_short_id = ? AND session_sample_index = ?`
     )
-    .get(sessionId)
+    .get(sessionId, sampleIndex)
 
-  if (!session) return error(res, 404, `Session "${sessionId}" Not Found`)
+  if (!sample)
+    return error(
+      res,
+      404,
+      `Sample "${sampleIndex}", Session "${sessionId}" Not Found`
+    )
 
-  session.summary_samples = JSON.parse(session.summary_samples)
-  session.patch = JSON.parse(session.patch)
-
-  return send(res, 200, session)
+  return send(res, 200, getSampleObject(sample))
 })
