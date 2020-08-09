@@ -70,8 +70,6 @@ test("Get Sample", async (t) => {
   await Promise.all(samplesQueries)
 
   const response = await getJSON(`${url}/api/session/${objectToInsert.short_id}/sample/0`);
-  t.assert(response);
-  console.log(response)
 
   t.deepEqual(response, {
     imageUrl:
