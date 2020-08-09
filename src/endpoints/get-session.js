@@ -19,22 +19,8 @@ module.exports = cors(async (req, res) => {
 
   if (!session) return error(res, 404, `Session "${sessionId}" Not Found`)
 
-  const samplesQueryResults = db
-    .prepare(
-      `SELECT  *
-       FROM sample_state
-       WHERE session_short_id = ?`
-    )
-    .all(session.short_id)
-
-  const samples = []
-  samplesQueryResults.forEach((sample) => {
-    const sessionUDT = getSampleObject(sample)
-    samples.push(sessionUDT)
-  })
-  session.udt_json = JSON.parse(session.udt_json)
+  session.summary_samples = JSON.parse(session.summary_samples)
   session.patch = JSON.parse(session.patch)
-  session.udt_json.samples = samples
 
   return send(res, 200, session)
 })
