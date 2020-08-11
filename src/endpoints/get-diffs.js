@@ -25,7 +25,7 @@ module.exports = cors(async (req, res) => {
 
   if (!session) return error(res, 404, "Session Not Found")
 
-  session.summary_samples = JSON.parse(session.summary_samples)
+  session.summary_object = JSON.parse(session.summary_object)
 
   const patchesStmt = db.prepare(`
     SELECT patch, user_name 
@@ -55,6 +55,6 @@ module.exports = cors(async (req, res) => {
     patch,
     changeLog,
     latestVersion: session.summary_version,
-    hashOfLatestState: hash(session.summary_samples),
+    hashOfLatestState: hash(session.summary_object),
   })
 })

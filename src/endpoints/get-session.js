@@ -19,7 +19,7 @@ module.exports = cors(async (req, res) => {
 
   if (!session) return error(res, 404, `Session "${sessionId}" Not Found`)
 
-  session.summary_samples = JSON.parse(session.summary_samples)
+  session.summary_object = JSON.parse(session.summary_object)
   session.patch = JSON.parse(session.patch)
 
   return send(res, 200, session)

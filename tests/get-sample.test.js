@@ -12,7 +12,7 @@ test("Get Sample", async (t) => {
   const url = await listen(service);
 
   const objectToInsert = {
-    "summary_samples": {
+    "summary_object": {
       "interface": {
         "type": "image_classification",
         "labels": [
@@ -57,8 +57,8 @@ test("Get Sample", async (t) => {
   };
 
   db.prepare(
-      "INSERT INTO session_state (short_id, summary_samples) VALUES (?, ?)"
-  ).run(objectToInsert.short_id, JSON.stringify(objectToInsert.summary_samples));
+      "INSERT INTO session_state (short_id, summary_object) VALUES (?, ?)"
+  ).run(objectToInsert.short_id, JSON.stringify(objectToInsert.summary_object));
 
   const samplesQueries = []
   objectToInsert.samples.forEach((sample, index) => {

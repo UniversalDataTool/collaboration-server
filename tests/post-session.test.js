@@ -39,7 +39,7 @@ test("Create session", async (t) => {
     )
     .get(response.short_id);
   t.assert(sessionAdded);
-  t.deepEqual(JSON.parse(sessionAdded.summary_samples), {
+  t.deepEqual(JSON.parse(sessionAdded.summary_object), {
     "interface": {
       type: "image_segmentation",
       availableLabels: ["valid", "invalid"],

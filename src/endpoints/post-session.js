@@ -33,7 +33,7 @@ module.exports = cors(async (req, res) => {
     await Promise.all(samplesQueries)
   }
 
-  const summary_samples = {
+  const summary_object = {
     interface: udt.interface,
     summary: {
       samples: samplesSummary,
@@ -42,9 +42,9 @@ module.exports = cors(async (req, res) => {
 
   await db
     .prepare(
-      "INSERT INTO session_state (short_id, summary_samples) VALUES (?, ?)"
+      "INSERT INTO session_state (short_id, summary_object) VALUES (?, ?)"
     )
-    .run(shortId, JSON.stringify(summary_samples))
+    .run(shortId, JSON.stringify(summary_object))
 
   return send(res, 200, { short_id: shortId, summary_version: 0 })
 })
