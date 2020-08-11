@@ -13,7 +13,7 @@ test("Get Session Diff", async (t) => {
     const url = await listen(service);
 
     const objectToInsert = {
-        summary_samples: JSON.stringify({
+        summary_object: JSON.stringify({
             "interface": {
                 "type": "image_classification",
                 "labels": [
@@ -48,8 +48,8 @@ test("Get Session Diff", async (t) => {
     };
 
     await db
-        .prepare("INSERT INTO session_state (short_id, summary_samples) VALUES (?, ?)")
-        .run(objectToInsert.short_id, objectToInsert.summary_samples);
+        .prepare("INSERT INTO session_state (short_id, summary_object) VALUES (?, ?)")
+        .run(objectToInsert.short_id, objectToInsert.summary_object);
 
     const firstState = await db
         .prepare(
@@ -67,7 +67,7 @@ test("Get Session Diff", async (t) => {
     t.assert(res1.patch.length === 0);
 
     const secondObjectToInsert = {
-        summary_samples: JSON.stringify({
+        summary_object: JSON.stringify({
             "interface": {
                 "type": "image_classification",
                 "labels": [
@@ -101,7 +101,7 @@ test("Get Session Diff", async (t) => {
         patch: JSON.stringify([
             {
                 op: "replace",
-                path: "/summary_samples/interface/labels/0/description",
+                path: "/summary_object/interface/labels/0/description",
                 value: "valid option",
             },
         ]),
@@ -111,11 +111,11 @@ test("Get Session Diff", async (t) => {
 
     await db
         .prepare(
-            "INSERT INTO session_state (short_id, summary_samples, patch, summary_version) VALUES (?, ?, ?, ?)"
+            "INSERT INTO session_state (short_id, summary_object, patch, summary_version) VALUES (?, ?, ?, ?)"
         )
         .run(
             secondObjectToInsert.short_id,
-            secondObjectToInsert.summary_samples,
+            secondObjectToInsert.summary_object,
             secondObjectToInsert.patch,
             secondObjectToInsert.summary_version
         );

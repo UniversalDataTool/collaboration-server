@@ -5,7 +5,7 @@ module.exports = (db) => {
         CREATE TABLE IF NOT EXISTS session_state (
             session_state_id INTEGER PRIMARY KEY AUTOINCREMENT,
             short_id TEXT NOT NULL,
-            summary_samples TEXT NOT NULL,
+            summary_object TEXT NOT NULL,
             summary_version INTEGER NOT NULL DEFAULT 0,
             patch TEXT,
             user_name TEXT,
