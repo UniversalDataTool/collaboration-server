@@ -1,5 +1,5 @@
 {
-  "name": "collaboration-server",
+  "name": "udt-collaboration-server",
   "version": "0.0.0",
   "main": "index.js",
   "repository": "https://github.com/UniversalDataTool/collaboration-server",
