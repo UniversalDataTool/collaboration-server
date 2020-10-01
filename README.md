@@ -1,7 +1,5 @@
 # Universal Data Tool Collaboration Server
 
-> The default branch on this repository is not compatible with the current Universal Data Tool. Use the "master" branch. We're changing the api to allow for bigger datasets!
-
 > _Note: This is just for people that want to run their own collaboration server. You don't need to use
 > this to collaborate with the Universal Data Tool, because there's a builtin public server._
 
