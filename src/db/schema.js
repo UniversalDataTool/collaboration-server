@@ -32,8 +32,6 @@ module.exports = (db) => {
             sample_version INTEGER NOT NULL DEFAULT 0,
             sample_ref_id TEXT,
             content TEXT NOT NULL,
-            summary TEXT,
-            annotation TEXT,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(session_short_id, sample_ref_id),
             UNIQUE(session_short_id, sample_index)
@@ -44,7 +42,7 @@ module.exports = (db) => {
         FOR EACH ROW
         WHEN NEW.sample_ref_id IS NULL
         BEGIN
-            UPDATE sample_state SET sample_ref_id = randomid();
+            UPDATE sample_state SET sample_ref_id = randomid() WHERE sample_state.rowid = NEW.rowid;
         END;
 
 

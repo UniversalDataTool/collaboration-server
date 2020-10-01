@@ -1,5 +1,6 @@
 const fjp = require("fast-json-patch")
 const samplePathRe = /\/samples\/([^/]+)(.*)/
+const applyRemoveSample = require("./apply-remove-sample")
 
 module.exports = async ({ db, patch, sessionId, workingSummaryObject }) => {
   const prevSession = db
@@ -9,9 +10,6 @@ module.exports = async ({ db, patch, sessionId, workingSummaryObject }) => {
   // Get relevant sample existing data
   const m = patch.path.match(samplePathRe)
   if (!m[1]) throw new Error(`Invalid sample patch to path "${patch.path}"`)
-  if (!m[2]) {
-    throw new Error("TODO full sample changes")
-  }
 
   let sampleIndex,
     sampleId,
@@ -39,6 +37,14 @@ module.exports = async ({ db, patch, sessionId, workingSummaryObject }) => {
         "SELECT sample_index FROM sample_state WHERE session_short_id=? AND sample_ref_id=? LIMIT 1"
       )
       .get(sessionId, sampleId).sample_index
+  }
+
+  if (!sampleChangePath && patch.op === "remove") {
+    applyRemoveSample({ sessionId, db, sampleId, workingSummaryObject })
+    return
+  }
+  if (!sampleChangePath) {
+    throw new Error(`Ununusual PATCH: ${JSON.stringify(patch)}`)
   }
 
   const sample = db

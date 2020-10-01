@@ -160,8 +160,6 @@ test("Patch Sample via PATCH /api/session", async (t) => {
     ],
   })
 
-  sample = await getJSON(`${url}/api/session/testPatch/sample/2`)
-  t.assert(!sample)
   sample = await getJSON(`${url}/api/session/testPatch/sample/0`)
   t.is(sample.imageUrl, "https://example.com/exampleimage2.png")
   sample = await getJSON(`${url}/api/session/testPatch/sample/1`)

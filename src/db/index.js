@@ -20,7 +20,7 @@ module.exports = (options = {}) => {
   })
 
   db.function("randomid", () => {
-    return "s" + Math.random().toString(36).slice(-8)
+    return "s_" + Math.random().toString(36).slice(-8)
   })
 
   loadSchema(db)
