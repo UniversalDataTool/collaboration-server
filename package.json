@@ -26,6 +26,7 @@
     "randomstring": "^1.1.5"
   },
   "devDependencies": {
+    "@semantic-release/git": "^9.0.0",
     "bent": "^7.3.6",
     "eslint": "^7.10.0",
     "prettier": "^2.0.5",
