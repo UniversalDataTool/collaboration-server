@@ -18,23 +18,29 @@ module.exports = cors(async (req, res) => {
   const samplesSummary = []
   if (Array.isArray(samples)) {
     const samplesQueries = []
-    samples.forEach((sample, index) => {
+    for (const [index, sample] of samples.entries()) {
+      const newSampleId = db.randomid()
       samplesQueries.push(
         db
           .prepare(
-            "INSERT INTO sample_state (session_short_id, sample_index, content) VALUES (?, ?, ?)"
+            "INSERT INTO sample_state (session_short_id, sample_index, content, sample_ref_id) VALUES (?, ?, ?, ?)"
           )
-          .run(shortId, index, JSON.stringify({ ...sample }))
+          .run(shortId, index, JSON.stringify(sample), newSampleId)
       )
 
-      samplesSummary.push({ hasAnnotation: false, version: 1 })
-    })
+      samplesSummary.push({
+        hasAnnotation: false,
+        version: 0,
+        _id: newSampleId,
+      })
+    }
 
     await Promise.all(samplesQueries)
   }
 
   const summary_object = {
-    interface: udt.interface,
+    ...udt,
+    samples: undefined,
     summary: {
       samples: samplesSummary,
     },

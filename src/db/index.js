@@ -19,9 +19,10 @@ module.exports = (options = {}) => {
     verbose: options.verbose !== undefined ? console.log : null,
   })
 
-  db.function("randomid", () => {
+  db.randomid = () => {
     return "s_" + Math.random().toString(36).slice(-8)
-  })
+  }
+  db.function("randomid", db.randomid)
 
   loadSchema(db)
 
