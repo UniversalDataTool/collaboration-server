@@ -1,11 +1,11 @@
 const { send, json } = require("micro")
 const cors = require("micro-cors")()
 const randomstring = require("randomstring")
-const error = require("../../utils/error")
+const error = require("../utils/error")
 const getDB = require("../db")
-const db = getDB({ databasePath: "udt.db", verbose: null })
 
 module.exports = cors(async (req, res) => {
+  const db = getDB()
   if (req.method === "OPTIONS") return send(res, 200, "ok")
   const body = await json(req)
   if (!body) return error(res, 400, "Need JSON body")
@@ -22,9 +22,9 @@ module.exports = cors(async (req, res) => {
       samplesQueries.push(
         db
           .prepare(
-            "INSERT INTO sample_state (session_short_id, session_sample_index, content) VALUES (?, ?, ?)"
+            "INSERT INTO sample_state (session_short_id, sample_index, content) VALUES (?, ?, ?)"
           )
-          .run(shortId, index, JSON.stringify(sample))
+          .run(shortId, index, JSON.stringify({ ...sample }))
       )
 
       samplesSummary.push({ hasAnnotation: false, version: 1 })

@@ -1,14 +1,13 @@
 const { send } = require("micro")
 const cors = require("micro-cors")()
 const query = require("micro-query")
-const hash = require("../../utils/hash.js")
-const error = require("../../utils/error")
-const getSampleObject = require("../../utils/getSampleObject")
+const hash = require("../utils/hash.js")
+const error = require("../utils/error")
 const getDB = require("../db")
-const db = getDB({ databasePath: "udt.db", verbose: null })
 
 module.exports = cors(async (req, res) => {
   if (req.method === "OPTIONS") return send(res, 200, "ok")
+  const db = getDB()
   const sessionId = req.params.session_id
 
   let since
@@ -28,9 +27,9 @@ module.exports = cors(async (req, res) => {
   session.summary_object = JSON.parse(session.summary_object)
 
   const patchesStmt = db.prepare(`
-    SELECT patch, user_name 
-    FROM session_state 
-    WHERE short_id = ? AND summary_version > ? 
+    SELECT patch, user_name
+    FROM session_state
+    WHERE short_id = ? AND summary_version > ?
     ORDER BY created_at ASC`)
   const patches = patchesStmt.all(sessionId, since)
 

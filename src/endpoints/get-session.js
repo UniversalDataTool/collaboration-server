@@ -1,16 +1,15 @@
 const { send } = require("micro")
 const cors = require("micro-cors")()
-const error = require("../../utils/error")
-const getSampleObject = require("../../utils/getSampleObject")
+const error = require("../utils/error")
 const getDB = require("../db")
-const db = getDB({ databasePath: "udt.db", verbose: null })
 
 module.exports = cors(async (req, res) => {
+  const db = getDB()
   const sessionId = req.params.session_id
 
   const session = db
     .prepare(
-      `SELECT  *
+      `SELECT short_id, summary_object, summary_version
        FROM latest_session_state
        WHERE short_id = ?
        LIMIT 1`
@@ -19,8 +18,9 @@ module.exports = cors(async (req, res) => {
 
   if (!session) return error(res, 404, `Session "${sessionId}" Not Found`)
 
-  session.summary_object = JSON.parse(session.summary_object)
-  session.patch = JSON.parse(session.patch)
-
-  return send(res, 200, session)
+  return send(res, 200, {
+    shortId: session.short_id,
+    summaryVersion: session.summary_version,
+    ...JSON.parse(session.summary_object),
+  })
 })

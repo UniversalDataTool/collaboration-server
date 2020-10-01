@@ -1,11 +1,10 @@
 const { send } = require("micro")
 const cors = require("micro-cors")()
-const error = require("../../utils/error")
-const getSampleObject = require("../../utils/getSampleObject")
+const error = require("../utils/error")
 const getDB = require("../db")
-const db = getDB({ databasePath: "udt.db", verbose: null })
 
 module.exports = cors(async (req, res) => {
+  const db = getDB()
   const sessionId = req.params.session_id
   const sampleIndex = req.params.sample_index
 
@@ -13,7 +12,7 @@ module.exports = cors(async (req, res) => {
     .prepare(
       `SELECT  *
        FROM sample_state
-       WHERE session_short_id = ? AND session_sample_index = ?`
+       WHERE session_short_id = ? AND sample_index = ?`
     )
     .get(sessionId, sampleIndex)
 
@@ -24,5 +23,8 @@ module.exports = cors(async (req, res) => {
       `Sample "${sampleIndex}", Session "${sessionId}" Not Found`
     )
 
-  return send(res, 200, getSampleObject(sample))
+  return send(res, 200, {
+    _id: sample.sample_ref_id,
+    ...JSON.parse(sample.content),
+  })
 })
