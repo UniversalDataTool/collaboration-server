@@ -7,7 +7,7 @@ const getDB = require("../db")
 module.exports = cors(async (req, res) => {
   const db = getDB()
   if (req.method === "OPTIONS") return send(res, 200, "ok")
-  const body = await json(req)
+  const body = await json(req, { limit: "100mb" })
   if (!body) return error(res, 400, "Need JSON body")
   if (!body.udt) return error(res, 400, 'Body should have "udt" key')
 

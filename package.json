@@ -4,6 +4,9 @@
   "main": "index.js",
   "repository": "https://github.com/UniversalDataTool/collaboration-server",
   "license": "MIT",
+  "bin": {
+    "udt-collaboration-server": "./bin/cli.js"
+  },
   "scripts": {
     "start": "micro-dev ./app.js",
     "start:prod": "micro-dev ./app.js",
