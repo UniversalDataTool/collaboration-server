@@ -7,9 +7,11 @@
   "scripts": {
     "start": "micro-dev ./app.js",
     "start:prod": "micro-dev ./app.js",
-    "test": "ava tests/**/*.test.js",
+    "test": " npm run test:ava && npm run lint && npm run test:prettier",
     "prettier": "prettier --write \"src/**/*.js\"",
-    "test:prettier": "prettier --check \"src/**/*.js\""
+    "test:prettier": "prettier --check \"src/**/*.js\"",
+    "test:ava": "ava tests/**/*.test.js",
+    "lint": "eslint src tests"
   },
   "dependencies": {
     "ava": "^3.13.0",

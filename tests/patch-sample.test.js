@@ -1,7 +1,6 @@
 const test = require("ava")
 const getDB = require("../src/db")
 const app = require("../app")
-const http = require("http")
 const micro = require("micro")
 const listen = require("test-listen")
 const patchJSON = require("bent")("json", "PATCH")

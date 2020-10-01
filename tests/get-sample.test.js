@@ -1,7 +1,6 @@
 const test = require("ava")
 const getDB = require("../src/db")
 const app = require("../app")
-const http = require("http")
 const micro = require("micro")
 const listen = require("test-listen")
 const getJSON = require("bent")("json", "GET", 200, 400, 404)
@@ -30,15 +29,15 @@ test("Get Sample", async (t) => {
         samples: [
           {
             hasAnnotation: false,
-            version: 1,
+            version: 0,
           },
           {
             hasAnnotation: false,
-            version: 1,
+            version: 0,
           },
           {
             hasAnnotation: false,
-            version: 1,
+            version: 0,
           },
         ],
       },

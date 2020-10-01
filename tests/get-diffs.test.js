@@ -1,11 +1,9 @@
 const test = require("ava")
 const getDB = require("../src/db")
 const app = require("../app")
-const http = require("http")
 const micro = require("micro")
 const listen = require("test-listen")
 const getJSON = require("bent")("json", "GET")
-const patchJSON = require("bent")("json", "PATCH")
 
 test("Get Session Diff", async (t) => {
   const db = await getDB({ testDB: true })
