@@ -1,7 +1,10 @@
 module.exports = (db) => {
   // Create schema in database
 
-  const sqlInit = `
+  const { user_version: userVersion } = db.prepare("PRAGMA user_version").get()
+
+  if (userVersion === 0) {
+    const sqlInit = `
         CREATE TABLE IF NOT EXISTS session_state (
             session_state_id INTEGER PRIMARY KEY AUTOINCREMENT,
             short_id TEXT NOT NULL,
@@ -48,10 +51,13 @@ module.exports = (db) => {
 
         CREATE INDEX IF NOT EXISTS short_id_idx ON session_state(short_id);
         CREATE INDEX IF NOT EXISTS previous_session_state_id_idx ON session_state(previous_session_state_id);
-        CREATE INDEX IF NOT EXISTS sample_short_id_idx ON sample_state(session_short_id);`
-  try {
-    db.exec(sqlInit)
-  } catch (e) {
-    throw new Error(`Database failed to initialize: ${e.toString()}`)
+        CREATE INDEX IF NOT EXISTS sample_short_id_idx ON sample_state(session_short_id);
+
+        PRAGMA user_version = 1;`
+    try {
+      db.exec(sqlInit)
+    } catch (e) {
+      throw new Error(`Database failed to initialize: ${e.toString()}`)
+    }
   }
 }
