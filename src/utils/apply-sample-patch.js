@@ -9,13 +9,18 @@ module.exports = async ({ db, patch, sessionId, workingSummaryObject }) => {
   if (!m[1]) throw new Error(`Invalid sample patch to path "${patch.path}"`)
 
   let { sampleIndex, sampleId } = getSampleIndexAndId(sessionId, m[1])
-  const sampleChangePath = m[2]
+  let sampleChangePath = m[2]
+
+  if (patch.op === "replace" && !sampleChangePath) {
+    sampleChangePath = ""
+  }
 
   if (!sampleChangePath && patch.op === "remove") {
     applyRemoveSample({ sessionId, db, sampleId, workingSummaryObject })
     return
   }
-  if (!sampleChangePath) {
+
+  if (!sampleChangePath && typeof sampleChangePath !== "string") {
     throw new Error(`Unusual PATCH: ${JSON.stringify(patch)}`)
   }
 
