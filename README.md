@@ -1,5 +1,7 @@
 # Universal Data Tool Collaboration Server
 
+[![npm version](https://badge.fury.io/js/udt-collaboration-server.svg)](https://badge.fury.io/js/udt-collaboration-server)
+
 > _Note: This is just for people that want to run their own collaboration server. You don't need to use
 > this to collaborate with the Universal Data Tool, because there's a builtin public server._
 
@@ -20,6 +22,8 @@ the address to the server this project runs and you should be able to collaborat
 
 ### API
 
+Check out the [API Sequence Diagram here](https://github.com/UniversalDataTool/collaboration-server/blob/master/docs/sequenceDiagram-v1.png).
+
 This server exposes the following endpoints:
 
 - `POST /api/session`: Creates a link to a UDT session. Whoever initiates collaboration mode calls this. It is called exactly once to start a session. A session lasts indefinitely. Returns the url to the session.
@@ -36,22 +40,4 @@ This server exposes the following endpoints:
 
 ### Database Architecture
 
-Table: `session_state`
-
-- **session_state_id** uuid randomly generated (or serial id)
-- **short_id** text randomly generated: represents the session id
-- **udt_json** jsonb: The state of the UDT file
-- **patch** jsonb: The patch that created this version from the previous version
-- **previous_session_state_id** uuid: Identifier for previous state
-- **version** integer: Integer identifying the revision number
-- **created_at** timestamptz: Timestamp on creation
-
-The database will have the following constraints applied
-
-- UNIQUE previous_session_state_id
-  - Each session can only have one subsequent state. This prevents certain race conditions.
-
-The database will have the following SQL triggers:
-
-- Delete session_states that are older than 1 hour AND not the latest state
-  - Triggered when a session state is inserted.
+Check the [schema.js](https://github.com/UniversalDataTool/collaboration-server/blob/master/src/db/schema.js)
