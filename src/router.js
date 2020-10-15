@@ -9,6 +9,12 @@ const getSampleEndpoint = require("./endpoints/get-sample.js")
 const patchSampleEndpoint = require("./endpoints/patch-sample.js")
 const downloadEndpoint = require("./endpoints/download-session.js")
 
+const welcome = (req, res) =>
+  micro.send(
+    res,
+    200,
+    "This is a UDT Collaboration Server, learn more at https://github.com/UniversalDataTool/collaboration-server"
+  )
 const notfound = (req, res) => micro.send(res, 404)
 
 module.exports = router(
@@ -22,5 +28,6 @@ module.exports = router(
   get("/api/session/:session_id", getSessionEndpoint),
   patch("/api/session/:session_id", patchSessionEndpoint),
   options("/api/session/:session_id", patchSessionEndpoint),
+  get("/", welcome),
   get("/*", notfound)
 )
