@@ -9,6 +9,14 @@ This project runs a collaboration server that can be used with the Universal Dat
 go into the UDT and open a project. Under `Setup > Advanced`, you'll see a button for "Custom Collaboration Server". Put in
 the address to the server this project runs and you should be able to collaborate with anyone else on that server.
 
+## Usage
+
+```bash
+npm install -g udt-collaboration-server
+
+udt-collaboration-server --port 80
+```
+
 ## Technical Details
 
 ### Technologies Used

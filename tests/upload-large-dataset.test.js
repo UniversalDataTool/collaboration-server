@@ -19,7 +19,7 @@ test("Create session", async (t) => {
     samples: [],
   }
 
-  const numSamples = 100000
+  const numSamples = 50000
   for (let i = 0; i < numSamples; i++) {
     udt.samples.push({
       imageUrl:
