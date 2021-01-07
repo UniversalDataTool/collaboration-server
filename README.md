@@ -17,6 +17,12 @@ npm install -g udt-collaboration-server
 udt-collaboration-server --port 80
 ```
 
+## Support & Docs
+
+Join the [Universal Data Tool Slack](https://universaldatatool.slack.com) if you run into any issues!
+
+You may find [the UDT docs](https://docs.universaldatatool.com) helpful as well!
+
 ## Technical Details
 
 ### Technologies Used
