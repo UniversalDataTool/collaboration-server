@@ -1,8 +1,8 @@
 module.exports = async ({ db, patch, sessionId, workingSummaryObject }) => {
   const numSamples = workingSummaryObject.summary.samples.length
   db.prepare(
-    "INSERT INTO sample_state (sample_index, session_short_id, content) VALUES (?, ?, ?)"
-  ).run(numSamples, sessionId, JSON.stringify(patch.value))
+    "INSERT INTO sample_state (sample_index, sample_ref_id, session_short_id, content) VALUES (?, ?, ?, ?)"
+  ).run(numSamples, patch.value._id, sessionId, JSON.stringify(patch.value))
 
   const sample = db
     .prepare(

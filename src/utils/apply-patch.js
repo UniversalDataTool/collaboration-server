@@ -16,7 +16,10 @@ module.exports = async ({ db, patch: patches, sessionId, userName = null }) => {
   for (const patch of patches) {
     if (patch.path.startsWith("/samples/") && patch.op === "add") {
       await applyAddSamplePatch({ db, patch, sessionId, workingSummaryObject })
-    } else if (patch.path.startsWith("/samples/")) {
+    } else if (
+      patch.path.startsWith("/sample/") ||
+      patch.path.startsWith("/samples/")
+    ) {
       await applySamplePatch({ db, patch, sessionId, workingSummaryObject })
     } else {
       await applySummaryPatch({ db, patch, sessionId, workingSummaryObject })
