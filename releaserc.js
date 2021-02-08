@@ -10,9 +10,7 @@ module.exports = {
       {
         assets: ["package.json"],
         message:
-          "chore(release): ${nextRelease.version} [skip ci]
-
-${nextRelease.notes}",
+          "chore(release): ${nextRelease.version} [skip ci] ${nextRelease.notes}",
       },
     ],
   ],

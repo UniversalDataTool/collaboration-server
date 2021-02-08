@@ -18,8 +18,6 @@ const welcome = (req, res) =>
 const notfound = (req, res) => micro.send(res, 404)
 
 module.exports = router(
-  post("/api/session", postSessionEndpoint),
-  options("/api/session", postSessionEndpoint),
   get("/api/session/:session_id/download", downloadEndpoint),
   get("/api/session/:session_id/diffs", getDiffsEndpoint),
   options("/api/session/:session_id/diffs", getDiffsEndpoint),
@@ -28,6 +26,8 @@ module.exports = router(
   get("/api/session/:session_id", getSessionEndpoint),
   patch("/api/session/:session_id", patchSessionEndpoint),
   options("/api/session/:session_id", patchSessionEndpoint),
+  post("/api/session", postSessionEndpoint),
+  options("/api/session", postSessionEndpoint),
   get("/", welcome),
   get("/*", notfound)
 )
