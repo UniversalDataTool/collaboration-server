@@ -17,6 +17,16 @@ npm install -g udt-collaboration-server
 udt-collaboration-server --port 80
 ```
 
+## Usage as an npm module
+
+```javascript
+const runCollaborationServer = require("udt-collaboration-server")
+const server = runCollaborationServer({ port: 3000 })
+
+// Later...
+server.close()
+```
+
 ## Support & Docs
 
 Join the [Universal Data Tool Slack](https://universaldatatool.slack.com) if you run into any issues!
