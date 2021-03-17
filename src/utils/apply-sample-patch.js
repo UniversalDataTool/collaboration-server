@@ -1,5 +1,5 @@
 const fjp = require("fast-json-patch")
-const samplePathRe = "\\/(sample|samples)\\/([^/]+)(.*)"
+const samplePathRe = "\\/(sample|samples)\\/([^\\/]+)(.*)"
 const applyRemoveSample = require("./apply-remove-sample")
 const getSampleIndexAndId = require("./get-sample-index-and-id")
 
@@ -40,16 +40,25 @@ module.exports = async ({ db, patch, sessionId, workingSummaryObject }) => {
   ]).newDocument
 
   // Update sample in database with new content and new version
-
-  db.prepare(
-    "UPDATE sample_state SET sample_version=?, sample_ref_id=?, content=? WHERE session_short_id=? AND sample_ref_id=?"
-  ).run(
-    sample.sample_version + 1,
-    newSampleContent._id,
-    JSON.stringify(newSampleContent),
-    sessionId,
-    sampleId
-  )
+  if (newSampleContent._id)
+    db.prepare(
+      "UPDATE sample_state SET sample_version=?, sample_ref_id=?, content=? WHERE session_short_id=? AND sample_ref_id=?"
+    ).run(
+      sample.sample_version + 1,
+      newSampleContent._id,
+      JSON.stringify(newSampleContent),
+      sessionId,
+      sampleId
+    )
+  else
+    db.prepare(
+      "UPDATE sample_state SET sample_version=?, content=? WHERE session_short_id=? AND sample_ref_id=?"
+    ).run(
+      sample.sample_version + 1,
+      JSON.stringify(newSampleContent),
+      sessionId,
+      sampleId
+    )
 
   workingSummaryObject.summary.samples[sampleIndex] = {
     hasAnnotation: Boolean(newSampleContent.annotation),
