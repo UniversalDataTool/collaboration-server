@@ -3,3 +3,5 @@ node_modules
 .idea
 launch.json
 .vscode
+package-lock.json
+npm-shrinkwrap.json
