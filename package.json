@@ -30,7 +30,7 @@
     "rimraf": "^3.0.2",
     "tmp": "^0.2.1",
     "yargs": "^16.0.3",
-    "yargs-parser": "^20.2.7"
+    "yargs-parser": "^13.1.2"
   },
   "devDependencies": {
     "@semantic-release/git": "^9.0.0",
