@@ -8,12 +8,12 @@
     "udt-collaboration-server": "./bin/cli.js"
   },
   "scripts": {
-    "start": "micro-dev --watch src ./app.js",
+    "start": " micro-dev --watch src ./app.js",
     "start:prod": "micro ./app.js",
-    "test": " yarn test:ava && yarn lint && yarn test:prettier",
-    "prettier": "prettier --write \"src/**/*.js\"",
+    "test": "yarn run test:ava && yarn run lint && yarn run test:prettier",
+    "write:prettier": "prettier --write \"src/**/*.js\"",
     "test:prettier": "prettier --check \"src/**/*.js\"",
-    "test:ava": "yarn ava tests/**/*.test.js",
+    "test:ava": "ava tests/**/*.test.js",
     "lint": "eslint src tests"
   },
   "dependencies": {
@@ -41,6 +41,6 @@
     "test-listen": "^1.1.0"
   },
   "ava": {
-    "timeout": "60s"
+    "timeout": "120s"
   }
 }
